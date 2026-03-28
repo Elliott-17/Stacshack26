@@ -11,6 +11,7 @@ let lastInteractionAt = Date.now();
 let interactionOccurredSinceLastPing = false;
 let contentScriptActive = true;
 let activityIntervalId = null;
+let isBlockingNudgeActive = false;
 const NUDGES_SCRIPT_VERSION = "nudges-safe-v2";
 
 console.log("[ChromeRot][Nudges][Content] loaded", NUDGES_SCRIPT_VERSION);
@@ -110,6 +111,7 @@ function onDistractionComplete() {
 
 function showSuggestionToast(suggestion) {
   if (!suggestion || !suggestion.message) return;
+  if (isBlockingNudgeActive) return;
 
   if (suggestion.blockPage) {
     showBlockingNudgeOverlay(suggestion);
@@ -166,6 +168,7 @@ function showBlockingNudgeOverlay(suggestion) {
 
   const existingBlock = document.getElementById("chromerot-nudge-block");
   if (existingBlock) existingBlock.remove();
+  isBlockingNudgeActive = true;
 
   const isBreak = suggestion.tone === "break";
   const isPresence = suggestion.tone === "presence";
@@ -222,11 +225,32 @@ function showBlockingNudgeOverlay(suggestion) {
 
   const hint = document.createElement("div");
   hint.textContent = isPresence
-    ? "Move the mouse or click to confirm you are back and focused."
+    ? "Click below to confirm you are back and focused."
     : (isBreak
-      ? "Take a brief break, then continue when ready."
+      ? "Take a brief break. Try the Meditation Space for a quick reset."
       : "Close distractions and return to your main task.");
   hint.style.cssText = "font-size: 0.9rem; color: #a8aeb8; margin-bottom: 18px;";
+
+  const actions = document.createElement("div");
+  actions.style.cssText = "display:flex; gap:10px; justify-content:center; flex-wrap:wrap;";
+
+  if (isBreak) {
+    const meditateBtn = document.createElement("button");
+    meditateBtn.textContent = "Open Meditation Space";
+    meditateBtn.style.cssText = `
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 2px solid #5b6eee;
+      background: #5b6eee;
+      color: #0f1419;
+      font-weight: 700;
+      cursor: pointer;
+    `;
+    meditateBtn.addEventListener("click", () => {
+      safeSendMessage({ type: "OPEN_MEDITATION_PAGE" });
+    });
+    actions.appendChild(meditateBtn);
+  }
 
   const btn = document.createElement("button");
   btn.textContent = isPresence ? "I am here" : (isBreak ? "I took a short break" : "I am back to work");
@@ -240,20 +264,22 @@ function showBlockingNudgeOverlay(suggestion) {
     cursor: pointer;
   `;
   btn.addEventListener("click", () => {
+    isBlockingNudgeActive = false;
     overlay.remove();
     safeSendMessage({ type: "ACK_NUDGE_BLOCK", tone: suggestion.tone });
   });
+  actions.appendChild(btn);
 
   card.appendChild(title);
   card.appendChild(msg);
   card.appendChild(hint);
-  card.appendChild(btn);
+  card.appendChild(actions);
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 }
 
 function pingActivity() {
-  if (!contentScriptActive) return;
+  if (!contentScriptActive || isBlockingNudgeActive) return;
 
   const now = Date.now();
   const idleMs = now - lastInteractionAt;
@@ -264,12 +290,13 @@ function pingActivity() {
     {
       type: "ACTIVITY_PING",
       hostname: window.location.hostname,
+      pageHasFocus: document.hasFocus(),
       idleMs,
       interactionOccurred,
     },
     (response) => {
       console.log("[ChromeRot][Nudges][Content] ping response", response);
-      if (response && response.suggestion) {
+      if (!isBlockingNudgeActive && response && response.suggestion) {
         console.log("[ChromeRot][Nudges][Content] showing suggestion", response.suggestion);
         showSuggestionToast(response.suggestion);
       }

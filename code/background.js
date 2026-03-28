@@ -6,7 +6,7 @@ let mode = "focus";
 let nudgesEnabled = false;
 let presenceCheckinsEnabled = false;
 const presenceByTab = {};
-const PRESENCE_IDLE_THRESHOLD_MS = 5000;
+let PRESENCE_IDLE_THRESHOLD_MS = 5000;
 const PRESENCE_CHECKIN_COOLDOWN_MS = 5000;
 let lastNudgeAt = 0;
 const DEBUG_NUDGES = true;
@@ -15,8 +15,8 @@ const MIN_COOLDOWN = 10 * 1000;
 const MAX_COOLDOWN = 30 * 1000;
 const distractionMap = ["maze", "wordle", "zip", "queens"];
 
-const PRODUCTIVE_THRESHOLD_MS = 10000;
-const UNPRODUCTIVE_THRESHOLD_MS = 10000;
+let PRODUCTIVE_THRESHOLD_MS = 10000;
+let UNPRODUCTIVE_THRESHOLD_MS = 10000;
 const NUDGE_COOLDOWN_MS = 5000;
 const MAX_HEARTBEAT_DELTA_MS = 1000;
 const NUDGE_ESCALATION_WINDOW_MS = 20000; 
@@ -28,9 +28,6 @@ const nudgeEscalation = {
 };
 const productiveTotals = { ms: 0 };
 const unproductiveTotals = { ms: 0 };
-  nudgeEscalation.presence.level = 0;
-  nudgeEscalation.presence.lastAt = 0;
-  Object.keys(presenceByTab).forEach((k) => delete presenceByTab[k]);
 const lastByTab = {};
 
 
@@ -54,6 +51,7 @@ const PRODUCTIVE_SITES = [
   "chat.openai.com",
   "typst.app",
   "overleaf.com",
+  "catfishing.net"
 ];
 
 const UNPRODUCTIVE_SITES = [
@@ -115,11 +113,32 @@ function resetNudgeTracking() {
   unproductiveTotals.ms = 0;
   lastNudgeAt = 0;
   Object.keys(lastByTab).forEach((k) => delete lastByTab[k]);
+  Object.keys(presenceByTab).forEach((k) => delete presenceByTab[k]);
   nudgeEscalation.break.level = 0;
   nudgeEscalation.break.lastAt = 0;
   nudgeEscalation.work.level = 0;
   nudgeEscalation.work.lastAt = 0;
+  nudgeEscalation.presence.level = 0;
+  nudgeEscalation.presence.lastAt = 0;
   debugLog("resetNudgeTracking");
+}
+
+function clampMsFromSeconds(seconds, fallbackMs) {
+  const n = Number(seconds);
+  if (!Number.isFinite(n)) return fallbackMs;
+  const ms = Math.round(n * 1000);
+  return Math.min(Math.max(ms, 1000), 60 * 60 * 1000);
+}
+
+function getTimerSettingsPayload() {
+  return {
+    productiveThresholdMs: PRODUCTIVE_THRESHOLD_MS,
+    unproductiveThresholdMs: UNPRODUCTIVE_THRESHOLD_MS,
+    presenceIdleThresholdMs: PRESENCE_IDLE_THRESHOLD_MS,
+    productiveThresholdSeconds: Math.round(PRODUCTIVE_THRESHOLD_MS / 1000),
+    unproductiveThresholdSeconds: Math.round(UNPRODUCTIVE_THRESHOLD_MS / 1000),
+    presenceIdleThresholdSeconds: Math.round(PRESENCE_IDLE_THRESHOLD_MS / 1000),
+  };
 }
 
 function buildEscalatedSuggestion(tone, now) {
@@ -135,19 +154,19 @@ function buildEscalatedSuggestion(tone, now) {
   if (tone === "break") {
     if (state.level === 1) message = "You have been productive for a while. Take a short break.";
     if (state.level === 2) message = "Reminder: step away for 2 minutes to reset focus.";
-    if (state.level === 3) message = "Strong reminder: take a break now before continuing.";
+    if (state.level === 3) message = "Take a break now before continuing.";
     if (state.level >= NUDGE_BLOCK_LEVEL) message = "You really should take a break. Page is paused until you acknowledge.";
   } else {
     if (tone === "work") {
       if (state.level === 1) message = "You have been unproductive for a while. Time to get back to work.";
       if (state.level === 2) message = "Reminder: close distractions and return to your task.";
-      if (state.level === 3) message = "Strong reminder: you need to get back to work now.";
+      if (state.level === 3) message = "You need to get back to work now.";
       if (state.level >= NUDGE_BLOCK_LEVEL) message = "Stop procrastinating, time to work. Page is paused until you acknowledge.";
     } else {
       if (state.level === 1) message = "Still there? Quick check-in: come back when you can.";
       if (state.level === 2) message = "No activity detected. If you are doomscrolling on your phone, switch back now.";
-      if (state.level === 3) message = "Still no activity. Put the phone down and refocus on this page.";
-      if (state.level >= NUDGE_BLOCK_LEVEL) message = "PUT YOUR PHONE DOWN. REELS ARE NOT THAT GOOD. Please get back to work.";
+      if (state.level === 3) message = "Still no activity. Put the phone down and refocus.";
+      if (state.level >= NUDGE_BLOCK_LEVEL) message = "PUT YOUR PHONE DOWN. INSTAGRAM REELS INCREASE YOUR CHANCE OF DEMENTIA. Please get back to work.";
     }
   }
 
@@ -162,7 +181,7 @@ function buildEscalatedSuggestion(tone, now) {
   return suggestion;
 }
 
-function maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred) {
+function maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred, pageHasFocus) {
   const sinceLast = now - lastNudgeAt;
   if (sinceLast < NUDGE_COOLDOWN_MS) {
     debugLog("maybeBuildSuggestion", "cooldown active", {
@@ -202,7 +221,12 @@ function maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred) {
     return suggestion;
   }
 
-  if (presenceCheckinsEnabled && typeof tabId === "number" && typeof idleMs === "number") {
+  if (
+    presenceCheckinsEnabled &&
+    pageHasFocus &&
+    typeof tabId === "number" &&
+    typeof idleMs === "number"
+  ) {
     if (!presenceByTab[tabId]) {
       presenceByTab[tabId] = { lastPresenceNudgeAt: 0 };
     }
@@ -237,7 +261,7 @@ function maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred) {
   return null;
 }
 
-function recordActivity(tabId, hostname, now, idleMs, interactionOccurred) {
+function recordActivity(tabId, hostname, now, idleMs, interactionOccurred, pageHasFocus) {
   const category = classifySite(hostname);
   const prev = lastByTab[tabId];
 
@@ -293,7 +317,7 @@ function recordActivity(tabId, hostname, now, idleMs, interactionOccurred) {
     });
   }
 
-  return maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred);
+  return maybeBuildSuggestion(now, tabId, idleMs, interactionOccurred, pageHasFocus);
 }
 
 self.forceDistraction = (name) => {
@@ -337,6 +361,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ ok: true });
   }
 
+  if (msg.type === "OPEN_MEDITATION_PAGE") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("meditation.html") });
+    sendResponse({ ok: true });
+  }
+
   if (msg.type === "GET_NUDGE_SETTINGS") {
     sendResponse({ enabled: nudgesEnabled, presenceEnabled: presenceCheckinsEnabled });
   }
@@ -350,6 +379,29 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === "GET_PRESENCE_CHECKIN_SETTINGS") {
     sendResponse({ enabled: presenceCheckinsEnabled });
+  }
+
+  if (msg.type === "GET_TIMER_SETTINGS") {
+    sendResponse({ ok: true, ...getTimerSettingsPayload() });
+  }
+
+  if (msg.type === "SET_TIMER_SETTINGS") {
+    PRODUCTIVE_THRESHOLD_MS = clampMsFromSeconds(
+      msg.productiveThresholdSeconds,
+      PRODUCTIVE_THRESHOLD_MS
+    );
+    UNPRODUCTIVE_THRESHOLD_MS = clampMsFromSeconds(
+      msg.unproductiveThresholdSeconds,
+      UNPRODUCTIVE_THRESHOLD_MS
+    );
+    PRESENCE_IDLE_THRESHOLD_MS = clampMsFromSeconds(
+      msg.presenceIdleThresholdSeconds,
+      PRESENCE_IDLE_THRESHOLD_MS
+    );
+
+    resetNudgeTracking();
+    debugLog("SET_TIMER_SETTINGS", getTimerSettingsPayload());
+    sendResponse({ ok: true, ...getTimerSettingsPayload() });
   }
 
   if (msg.type === "SET_PRESENCE_CHECKIN_SETTINGS") {
@@ -374,6 +426,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return true;
     }
 
+    const pageHasFocus = msg.pageHasFocus !== false;
+
+    const isActiveTab = Boolean(sender && sender.tab && sender.tab.active);
+    if (!isActiveTab) {
+      debugLog("ACTIVITY_PING", "ignored because sender tab is not active");
+      sendResponse({ suggestion: null });
+      return true;
+    }
+
     const tabId = sender && sender.tab ? sender.tab.id : null;
     if (typeof tabId !== "number") {
       debugLog("ACTIVITY_PING", "ignored because no tab id");
@@ -384,7 +445,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const now = Date.now();
     const idleMs = Number(msg.idleMs) || 0;
     const interactionOccurred = Boolean(msg.interactionOccurred);
-    const suggestion = recordActivity(tabId, msg.hostname, now, idleMs, interactionOccurred);
+    const suggestion = recordActivity(
+      tabId,
+      msg.hostname,
+      now,
+      idleMs,
+      interactionOccurred,
+      pageHasFocus
+    );
     debugLog("ACTIVITY_PING", "response", { suggestion });
     sendResponse({ suggestion });
     return true;
