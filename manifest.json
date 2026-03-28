@@ -5,6 +5,25 @@
   "manifest_version": 3,
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "images/icon.jpg"
-  }
+    "default_icon": {
+      "16": "images/icon48.png",
+      "32": "images/icon48.png",
+      "48": "images/icon48.png",
+      "128": "images/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon48.png",
+    "32": "images/icon48.png",
+    "48": "images/icon48.png",
+    "128": "images/icon48.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://studres.cs.st-andrews.ac.uk/*"],
+      "js": ["/code/maze.js", "/code/wordle.js", "/code/distractions.js"],
+      "css": ["studres.css"]
+    }
+  ]
+  
 }
