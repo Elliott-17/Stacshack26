@@ -18,11 +18,13 @@
     "48": "images/icon48.png",
     "128": "images/icon48.png"
   },
+  "background": {
+    "service_worker": "/code/background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://studres.cs.st-andrews.ac.uk/*"],
-      "js": ["/code/maze.js", "/code/wordle.js", "/code/distractions.js"],
-      "css": ["studres.css"]
+      "matches": ["<all_urls>"],
+      "js": ["/code/maze.js", "/code/wordle.js", "/code/zip.js", "/code/queens.js", "/code/distractions.js"]
     }
   ]
   

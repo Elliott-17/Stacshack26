@@ -4,7 +4,7 @@ function wordleDistraction(onComplete) {
     "grace", "haste", "ivory", "joker", "knave", "lemon", "manor", "nerve",
     "ocean", "pixel", "quest", "raven", "spine", "tiger", "umbra", "vivid",
     "waltz", "xenon", "yacht", "zonal", "blaze", "crimp", "depot", "elbow",
-    "froze", "gloom", "havoc", "infer", "jumpy", "kiosk", "lithe", "mourn"
+    "froze", "gloom", "havoc", "infer", "jumpy", "kiosk", "lithe", "mourn", "honey"
   ];
 
   const MAX_GUESSES = 6;
@@ -30,7 +30,7 @@ function wordleDistraction(onComplete) {
   `;
 
   const title = document.createElement("div");
-  title.textContent = "ChudWordle";
+  title.textContent = "Wordle";
   title.style.cssText = "font-size: 1.5rem; font-weight: bold; margin-bottom: 16px;";
 
   const subtitle = document.createElement("div");
@@ -190,7 +190,7 @@ function wordleDistraction(onComplete) {
     guesses.push(currentGuess);
 
     if (currentGuess === targetWord) {
-      message.textContent = "🎉 Nice one!";
+      message.textContent = "Fine I guess you can be productive";
       gameOver = true;
       showWinPopup();
       return;
@@ -198,7 +198,7 @@ function wordleDistraction(onComplete) {
 
     if (guesses.length === MAX_GUESSES) {
       // Wrong — pick a new word and reset
-      message.textContent = `❌ It was "${targetWord.toUpperCase()}" — try a new one!`;
+      message.textContent = `It was "${targetWord.toUpperCase()}". You are not allowed to be productive yet`;
       setTimeout(resetGame, 1800);
       return;
     }

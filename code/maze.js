@@ -17,7 +17,7 @@ function mazeDistraction(onComplete) {
     font-family: monospace;
   `;
 
-  const CELL = 30;
+  const CELL = 100;
   const COLS = Math.floor((window.innerWidth * 0.9) / CELL);
   const ROWS = Math.floor((window.innerHeight * 0.9) / CELL);
   const canvas = document.createElement("canvas");
@@ -29,17 +29,9 @@ function mazeDistraction(onComplete) {
   label.textContent = "Solve the maze to be productive";
   label.style.cssText = "text-align:center; margin-bottom:6px; font-size:13px; font-weight:bold;";
 
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "✕";
-  closeBtn.style.cssText = `
-    position: absolute; top: 6px; right: 8px;
-    background: none; border: none; cursor: pointer; font-size: 14px;
-  `;
-  closeBtn.onclick = () => container.remove();
 
   container.appendChild(label);
   container.appendChild(canvas);
-  container.appendChild(closeBtn);
   document.body.appendChild(container);
 
   // --- Maze generation (recursive backtracker) ---

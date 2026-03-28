@@ -1,24 +1,27 @@
-// --- Distraction Framework ---
-const distractions = [
-  mazeDistraction,
-  wordleDistraction,
-  // add more here later
-];
+const distractionMap = {
+  maze: mazeDistraction,
+  wordle: wordleDistraction,
+  zip: zipDistraction,
+  queens: queensDistraction,
+};
 
-const MIN_COOLDOWN = 10 * 1000;  // 10 seconds
-const MAX_COOLDOWN = 500 * 60 * 1000; // 60 seconds
-
-function getRandomCooldown() {
-  return Math.floor(Math.random() * (MAX_COOLDOWN - MIN_COOLDOWN + 1)) + MIN_COOLDOWN;
+function launchDistraction(name) {
+  const pick = distractionMap[name] || distractionMap[Object.keys(distractionMap)[Math.floor(Math.random() * Object.keys(distractionMap).length)]];
+  pick(onDistractionComplete);
 }
 
-function launchRandomDistraction() {
-  const pick = distractions[Math.floor(Math.random() * distractions.length)];
-  pick(() => {
-    const cooldown = getRandomCooldown();
-    console.log(`[ChromeRot] Next distraction in ${cooldown / 1000}s`);
-    setTimeout(launchRandomDistraction, cooldown);
+function onDistractionComplete() {
+  chrome.runtime.sendMessage({ type: "DISTRACTION_COMPLETE" });
+}
+
+function checkAndLaunch() {
+  chrome.runtime.sendMessage({ type: "CHECK_DISTRACTION" }, (response) => {
+    if (response.launch) {
+      launchDistraction(response.forced);
+    } else {
+      setTimeout(checkAndLaunch, response.remaining);
+    }
   });
 }
 
-launchRandomDistraction();
+checkAndLaunch();

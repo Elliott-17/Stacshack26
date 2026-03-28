@@ -57,21 +57,15 @@
     margin-bottom: 6px;
   }
 
-  .status-pill {
-    display: inline-block;
-    font-size: 9px;
-    background: #1a2a1a;
-    border: 1px solid #2a4a2a;
-    color: #5a9a5a;
-    border-radius: 10px;
-    padding: 2px 8px;
-    margin-bottom: 10px;
+  .mode-buttons {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
   }
 
   button {
-    width: 100%;
+    flex: 1;
     padding: 7px;
-    margin-top: 5px;
     font-size: 11px;
     border-radius: 5px;
     cursor: pointer;
@@ -82,12 +76,34 @@
   }
   button:hover { background: #252540; }
 
+  button.active-focus {
+    background: rgba(50, 120, 50, 0.4);
+    border-color: rgba(100, 180, 100, 0.5);
+    color: #a8d8a8;
+    font-weight: bold;
+  }
+
+  button.active-unproductive {
+    background: rgba(140, 50, 50, 0.4);
+    border-color: rgba(180, 100, 100, 0.5);
+    color: #d8a8a8;
+    font-weight: bold;
+  }
+
   #btn-meditate {
+    margin-top: 0;
     background: rgba(80, 50, 140, 0.4);
     border-color: rgba(140, 100, 220, 0.5);
     color: #c8b8f0;
   }
   #btn-meditate:hover { background: rgba(80, 50, 140, 0.65); }
+
+  #status {
+    font-size: 9px;
+    color: #555;
+    min-height: 14px;
+    margin-top: 6px;
+  }
 </style>
 </head>
 <body>
@@ -96,18 +112,28 @@
  /  o o  \
 |    ^    |
  \ \___/ /
-  '-----'</div>
+  '-----'
+  |     |
+ _|_____|_</div>
 
 <h2>ChromeRot</h2>
 <p class="tagline">Anti-Productivity Tool</p>
 
-<div class="section-label">Distraction Mode</div>
-<div class="status-pill">● Active on StudRes</div>
+<hr class="divider">
+
+<div class="section-label">Mode</div>
+<div class="mode-buttons">
+  <button id="focusBtn">Focus</button>
+  <button id="unproductiveBtn">Unproductive</button>
+</div>
+<div id="status"></div>
 
 <hr class="divider">
 
 <div class="section-label">Take a Break</div>
-<button id="btn-meditate">🧘 Open Meditation Space</button>
+<div class="mode-buttons">
+  <button id="btn-meditate">🧘 Meditation Space</button>
+</div>
 
 <script src="popup.js"></script>
 </body>
