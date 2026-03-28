@@ -80,44 +80,54 @@ function zipDistraction(onComplete) {
   let timeLeft = TIME_LIMIT;
   let gameOver = false;
 
+  const COLORS = {
+    bg: "#0f1419",
+    text: "#e8eaed",
+    textMuted: "#a8aeb8",
+    accent: "#5b6eee",
+    success: "#10b981",
+    bgSecondary: "#1e2a3a",
+    border: "#5b6eee"
+  };
+
   // --- Container ---
   const container = document.createElement("div");
   container.style.cssText = `
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.92);
+    background: ${COLORS.bg};
     z-index: 99999;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    font-family: monospace; color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: ${COLORS.text};
     user-select: none;
   `;
 
   const title = document.createElement("div");
   title.textContent = "⚡ Zip";
-  title.style.cssText = "font-size: 1.5rem; font-weight: bold; margin-bottom: 6px;";
+  title.style.cssText = `font-size: 1.8rem; font-weight: 600; margin-bottom: 8px; color: ${COLORS.text};`;
 
   const subtitle = document.createElement("div");
-  subtitle.style.cssText = "font-size: 0.8rem; color: #aaa; margin-bottom: 12px;";
-  subtitle.textContent = "Connect 1→2→3… filling every cell. End on the last number!";
+  subtitle.style.cssText = `font-size: 0.9rem; color: ${COLORS.textMuted}; margin-bottom: 12px;`;
+  subtitle.textContent = "Connect 1→2→3… filling every cell. End on the last waypoint!";
 
   // Timer bar
   const timerWrap = document.createElement("div");
   timerWrap.style.cssText = `
     width: ${size * CELL}px; height: 8px;
-    background: #333; border-radius: 4px;
+    background: ${COLORS.bgSecondary}; border-radius: 4px;
     margin-bottom: 10px; overflow: hidden;
   `;
   const timerBar = document.createElement("div");
   timerBar.style.cssText = `
     height: 100%; width: 100%;
-    background: #4caf50;
+    background: ${COLORS.success};
     transition: width 1s linear, background 0.5s;
   `;
   timerWrap.appendChild(timerBar);
 
   const timerLabel = document.createElement("div");
-  timerLabel.style.cssText = "font-size: 0.85rem; color: #aaa; margin-bottom: 10px;";
+  timerLabel.style.cssText = `font-size: 0.85rem; color: ${COLORS.textMuted}; margin-bottom: 10px;`;
   timerLabel.textContent = `${TIME_LIMIT}s`;
 
   // Canvas
@@ -128,14 +138,14 @@ function zipDistraction(onComplete) {
   const ctx = canvas.getContext("2d");
 
   const message = document.createElement("div");
-  message.style.cssText = "font-size: 0.85rem; color: #f99; min-height: 20px; margin-top: 10px;";
+  message.style.cssText = `font-size: 0.85rem; color: #ef4444; min-height: 20px; margin-top: 10px;`;
 
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "↺ Reset path";
   resetBtn.style.cssText = `
     margin-top: 8px; padding: 6px 16px;
-    background: #333; color: white; border: 1px solid #555;
-    border-radius: 6px; cursor: pointer; font-family: monospace;
+    background: ${COLORS.bgSecondary}; color: ${COLORS.text}; border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 6px; cursor: pointer; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   `;
   resetBtn.onclick = resetPath;
 
@@ -154,17 +164,31 @@ function zipDistraction(onComplete) {
     const maxWaypoint = Math.max(...Object.values(waypoints));
 
     // Grid background
+    ctx.fillStyle = COLORS.bgSecondary;
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
-        ctx.fillStyle = "#1a1a2e";
-        ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+        ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
       }
+    }
+    ctx.strokeStyle = COLORS.border;
+    ctx.lineWidth = 1;
+    for (let r = 0; r <= size; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, r * CELL);
+      ctx.lineTo(size * CELL, r * CELL);
+      ctx.stroke();
+    }
+    for (let c = 0; c <= size; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * CELL, 0);
+      ctx.lineTo(c * CELL, size * CELL);
+      ctx.stroke();
     }
 
     // Path line
     if (path.length > 1) {
-      ctx.strokeStyle = "#7b68ee";
-      ctx.lineWidth = CELL * 0.4;
+      ctx.strokeStyle = COLORS.accent;
+      ctx.lineWidth = 3;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.beginPath();
@@ -178,9 +202,9 @@ function zipDistraction(onComplete) {
     }
 
     // Visited cells highlight
+    ctx.fillStyle = "rgba(99, 102, 241, 0.1)";
     for (const key of path) {
       const [r, c] = key.split(",").map(Number);
-      ctx.fillStyle = "rgba(123,104,238,0.2)";
       ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
     }
 
@@ -191,23 +215,16 @@ function zipDistraction(onComplete) {
       const isFinal = num === maxWaypoint;
 
       // Circle fill
-      ctx.fillStyle = visited ? "#7b68ee" : "#2a2a4a";
+      ctx.fillStyle = COLORS.accent;
+      if (isFinal) ctx.fillStyle = "#ef4444";
+      if (!visited) ctx.fillStyle = COLORS.bgSecondary;
       ctx.beginPath();
-      ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, CELL * 0.38, 0, Math.PI * 2);
+      ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, CELL / 2.8, 0, Math.PI * 2);
       ctx.fill();
 
-      // Gold ring for final waypoint
-      if (isFinal) {
-        ctx.strokeStyle = "#FFD700";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, CELL * 0.38, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
       // Number label
-      ctx.fillStyle = "white";
-      ctx.font = `bold ${CELL * 0.38}px monospace`;
+      ctx.fillStyle = "#000";
+      ctx.font = `bold ${CELL * 0.4}px 'Inter', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(num, c * CELL + CELL / 2, r * CELL + CELL / 2);
@@ -323,7 +340,7 @@ function zipDistraction(onComplete) {
       timeLeft--;
       timerLabel.textContent = `${timeLeft}s`;
       timerBar.style.width = `${(timeLeft / TIME_LIMIT) * 100}%`;
-      timerBar.style.background = timeLeft <= 10 ? "#e53935" : timeLeft <= 20 ? "#ff9800" : "#4caf50";
+      timerBar.style.background = timeLeft <= 10 ? "#ef4444" : timeLeft <= 20 ? "#f59e0b" : COLORS.success;
 
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
@@ -354,18 +371,18 @@ function zipDistraction(onComplete) {
     popup.style.cssText = `
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: white; color: black;
-      border: 2px solid #333; border-radius: 12px;
+      background: ${COLORS.bgSecondary}; color: ${COLORS.text};
+      border: 2px solid ${COLORS.accent}; border-radius: 12px;
       padding: 24px 32px; z-index: 999999;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      font-family: monospace; text-align: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center;
     `;
 
     if (won) {
       popup.innerHTML = `
-        <div style="font-size:2rem">⚡</div>
-        <div style="font-size:1.2rem;font-weight:bold;margin:8px 0">Zipped it!</div>
-        <div style="font-size:0.85rem;color:#666">Back to being unproductive in a different way.</div>
+        <div style="font-size:2rem">✓</div>
+        <div style="font-size:1.2rem;font-weight:bold;margin:8px 0;color:${COLORS.success}">Path complete!</div>
+        <div style="font-size:0.85rem;color:${COLORS.textMuted}">Time to get back to work.</div>
       `;
     } else {
       popup.innerHTML = `

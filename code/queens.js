@@ -40,8 +40,13 @@ function queensDistraction(onComplete) {
   ];
 
   const REGION_COLORS = [
-    "#e05c5c", "#5c8ee0", "#5cc45c", "#d4a017",
-    "#9b5ce0", "#e0925c", "#5ccdd4"
+    "#3b1d6b", "#123a6b", "#1f5b3a", "#5a4a14",
+    "#6b1f54", "#5a2f12", "#144e63"
+  ];
+
+  const REGION_BORDER_COLORS = [
+    "#a78bfa", "#60a5fa", "#4ade80", "#facc15",
+    "#f472b6", "#fb923c", "#22d3ee"
   ];
 
   let puzzle = PUZZLES[Math.floor(Math.random() * PUZZLES.length)];
@@ -52,26 +57,34 @@ function queensDistraction(onComplete) {
   let board = Array.from({ length: size }, () => Array(size).fill(0));
   let gameOver = false;
 
+  const COLORS = {
+    bg: "#0f1419",
+    text: "#e8eaed",
+    textMuted: "#a8aeb8",
+    accent: "#5b6eee",
+    bgSecondary: "#1e2a3a"
+  };
+
   // --- Container ---
   const container = document.createElement("div");
   container.style.cssText = `
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.92);
+    background: ${COLORS.bg};
     z-index: 99999;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    font-family: monospace; color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: ${COLORS.text};
     user-select: none;
   `;
 
   const title = document.createElement("div");
   title.textContent = "👑 Queens";
-  title.style.cssText = "font-size:1.5rem; font-weight:bold; margin-bottom:6px;";
+  title.style.cssText = `font-size:1.8rem; font-weight:600; margin-bottom:8px; color: ${COLORS.text};`;
 
   const subtitle = document.createElement("div");
-  subtitle.textContent = "One queen per row, column & colour. No touching, even diagonally.";
-  subtitle.style.cssText = "font-size:0.8rem; color:#aaa; margin-bottom:14px; text-align:center; max-width:400px;";
+  subtitle.textContent = "One queen per row, column & region. No adjacent queens.";
+  subtitle.style.cssText = `font-size:0.9rem; color:${COLORS.textMuted}; margin-bottom:14px; text-align:center; max-width:400px;`;
 
   // --- Grid ---
   const gridEl = document.createElement("div");
@@ -79,7 +92,7 @@ function queensDistraction(onComplete) {
     display: grid;
     grid-template-columns: repeat(${size}, ${CELL}px);
     grid-template-rows: repeat(${size}, ${CELL}px);
-    border: 2px solid #555;
+    border: 2px solid ${COLORS.accent};
   `;
 
   const cells = [];
@@ -87,11 +100,13 @@ function queensDistraction(onComplete) {
     cells.push([]);
     for (let c = 0; c < size; c++) {
       const cell = document.createElement("div");
-      const regionColor = REGION_COLORS[regions[r][c]];
+      const regionIndex = regions[r][c];
+      const regionColor = REGION_COLORS[regionIndex];
+      const regionBorder = REGION_BORDER_COLORS[regionIndex];
       cell.style.cssText = `
         width: ${CELL}px; height: ${CELL}px;
-        background: ${regionColor}33;
-        border: 1px solid ${regionColor}88;
+        background: ${regionColor};
+        border: 1px solid ${regionBorder};
         display: flex; align-items: center; justify-content: center;
         font-size: ${CELL * 0.5}px;
         cursor: pointer;
@@ -107,14 +122,14 @@ function queensDistraction(onComplete) {
   }
 
   const message = document.createElement("div");
-  message.style.cssText = "font-size:0.85rem; color:#f99; min-height:20px; margin-top:12px;";
+  message.style.cssText = `font-size:0.85rem; color:#ef4444; min-height:20px; margin-top:12px;`;
 
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "↺ Reset";
   resetBtn.style.cssText = `
     margin-top:8px; padding:6px 16px;
-    background:#333; color:white; border:1px solid #555;
-    border-radius:6px; cursor:pointer; font-family:monospace;
+    background:${COLORS.bgSecondary}; color:${COLORS.text}; border:1px solid rgba(99,102,241,0.3);
+    border-radius:6px; cursor:pointer; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   `;
   resetBtn.onclick = resetBoard;
 
@@ -214,8 +229,8 @@ function queensDistraction(onComplete) {
     const regionColor = REGION_COLORS[regions[r][c]];
     const state = board[r][c];
     cells[r][c].textContent = state === 2 ? "👑" : state === 1 ? "✕" : "";
-    cells[r][c].style.background = `${regionColor}${state === 2 ? "66" : "33"}`;
-    cells[r][c].style.color = state === 1 ? "#888" : "white";
+    cells[r][c].style.background = state === 2 ? COLORS.accent : regionColor;
+    cells[r][c].style.color = state === 1 ? "#d1d5db" : "#ffffff";
   }
 
   function renderBoard() {
@@ -229,16 +244,16 @@ function queensDistraction(onComplete) {
     popup.style.cssText = `
       position:fixed; top:50%; left:50%;
       transform:translate(-50%,-50%);
-      background:white; color:black;
-      border:2px solid #333; border-radius:12px;
+      background:${COLORS.bgSecondary}; color:${COLORS.text};
+      border:2px solid ${COLORS.accent}; border-radius:12px;
       padding:24px 32px; z-index:999999;
       box-shadow:0 8px 24px rgba(0,0,0,0.5);
-      font-family:monospace; text-align:center;
+      font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align:center;
     `;
     popup.innerHTML = `
-      <div style="font-size:2rem">👑</div>
-      <div style="font-size:1.2rem;font-weight:bold;margin:8px 0">All queens placed!</div>
-      <div style="font-size:0.85rem;color:#666">LinkedIn would be proud. Back to work.</div>
+      <div style="font-size:2rem">✓</div>
+      <div style="font-size:1.2rem;font-weight:bold;margin:8px 0;color:#10b981">Puzzle solved!</div>
+      <div style="font-size:0.85rem;color:${COLORS.textMuted}">Back to pretending to work.</div>
     `;
     document.body.appendChild(popup);
     setTimeout(() => {

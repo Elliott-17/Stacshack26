@@ -14,7 +14,7 @@ function setUI(mode) {
     subtitle.textContent = "v0.1 — focus mode";
     status.textContent = "✓ Distractions disabled";
   } else if (mode === "unproductive") {
-    subtitle.textContent = "v0.1 — chaos mode";
+    subtitle.textContent = "v0.1 — unproductive mode";
     status.textContent = "✓ Distractions enabled";
   } else {
     subtitle.textContent = "v0.1 — select a mode";

@@ -4,7 +4,7 @@ let activeDistraction = null; // tracks what's currently supposed to be showing
 let mode = "focus";
 
 const MIN_COOLDOWN = 10 * 1000;
-const MAX_COOLDOWN = 60 * 1000;
+const MAX_COOLDOWN = 30 * 1000;
 const distractionMap = ["maze", "wordle", "zip", "queens"];
 
 function getRandomCooldown() {

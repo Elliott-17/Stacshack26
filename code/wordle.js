@@ -13,29 +13,42 @@ function wordleDistraction(onComplete) {
   let currentGuess = "";
   let gameOver = false;
 
+  const COLORS = {
+    bg: "#0f1419",
+    text: "#e8eaed",
+    textMuted: "#a8aeb8",
+    accent: "#6366f1",
+    correct: "#10b981",
+    present: "#f59e0b",
+    absent: "#374151",
+    border: "#6b7280",
+    bgSecondary: "#1a1f2e",
+    bgTertiary: "#252d3d"
+  };
+
   // --- Container (fullscreen overlay) ---
   const container = document.createElement("div");
   container.style.cssText = `
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background: rgba(0,0,0,0.9);
+    background: ${COLORS.bg};
     z-index: 99999;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: monospace;
-    color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: ${COLORS.text};
   `;
 
   const title = document.createElement("div");
-  title.textContent = "Wordle";
-  title.style.cssText = "font-size: 1.5rem; font-weight: bold; margin-bottom: 16px;";
+  title.textContent = "📖 Wordle";
+  title.style.cssText = `font-size: 1.8rem; font-weight: 600; margin-bottom: 8px; color: ${COLORS.text};`;
 
   const subtitle = document.createElement("div");
   subtitle.textContent = "Guess the 5-letter word to continue.";
-  subtitle.style.cssText = "font-size: 0.85rem; color: #aaa; margin-bottom: 20px;";
+  subtitle.style.cssText = `font-size: 0.9rem; color: ${COLORS.textMuted}; margin-bottom: 20px;`;
 
   // --- Grid ---
   const grid = document.createElement("div");
@@ -55,11 +68,11 @@ function wordleDistraction(onComplete) {
       const cell = document.createElement("div");
       cell.style.cssText = `
         width: 52px; height: 52px;
-        border: 2px solid #555;
+        border: 2px solid #5b6eee;
         display: flex; align-items: center; justify-content: center;
         font-size: 1.4rem; font-weight: bold;
         text-transform: uppercase;
-        background: #111;
+        background: #1e2a3a;
         transition: background 0.3s;
       `;
       cells[r].push(cell);
@@ -70,7 +83,7 @@ function wordleDistraction(onComplete) {
 
   // --- Message ---
   const message = document.createElement("div");
-  message.style.cssText = "font-size: 0.9rem; color: #f99; min-height: 20px; margin-bottom: 12px;";
+  message.style.cssText = `font-size: 0.9rem; color: #ef4444; min-height: 20px; margin-bottom: 12px;`;
 
   // --- Keyboard ---
   const keyboardRows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
@@ -106,8 +119,8 @@ function wordleDistraction(onComplete) {
   enterKey.textContent = "ENTER";
   enterKey.style.cssText = `
     padding: 0 12px; height: 42px;
-    background: #444; color: white;
-    border: none; border-radius: 4px;
+    background: ${COLORS.bgTertiary}; color: ${COLORS.text};
+    border: 1px solid ${COLORS.border}; border-radius: 4px;
     font-size: 0.85rem; font-weight: bold; cursor: pointer;
   `;
   enterKey.onclick = submitGuess;
@@ -244,19 +257,19 @@ function wordleDistraction(onComplete) {
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: white; color: black;
-      border: 2px solid #333;
+      background: ${COLORS.bgSecondary}; color: ${COLORS.text};
+      border: 2px solid ${COLORS.accent};
       border-radius: 12px;
       padding: 24px 32px;
       z-index: 999999;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      font-family: monospace;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       text-align: center;
     `;
     popup.innerHTML = `
-      <div style="font-size: 2rem;">🟩</div>
-      <div style="font-size: 1.2rem; font-weight: bold; margin: 8px 0;">Wordle solved!</div>
-      <div style="font-size: 0.85rem; color: #666;">Back to pretending to work.</div>
+      <div style="font-size: 2rem;">✓</div>
+      <div style="font-size: 1.2rem; font-weight: bold; margin: 8px 0; color: ${COLORS.correct};">Word solved!</div>
+      <div style="font-size: 0.85rem; color: ${COLORS.textMuted};">Time to get back to work.</div>
     `;
     document.body.appendChild(popup);
     document.removeEventListener("keydown", handleKeydown);
