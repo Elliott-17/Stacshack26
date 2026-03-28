@@ -8,9 +8,18 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg:          #0f1419;
+      --fg:          #e8eaed;
+      --muted:       #a8aeb8;
+      --dim:         #3e424a;
+      --accent:      #6366f1;
+      --accent-rgb:  99, 102, 241;
+    }
+
     body {
-      background: #0f1419;
-      color: #a8aeb8;
+      background: var(--bg);
+      color: var(--muted);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       display: flex;
@@ -19,6 +28,7 @@
       justify-content: center;
       overflow: hidden;
       user-select: none;
+      transition: background 0.4s ease, color 0.4s ease;
     }
 
     /* ── Pattern tabs ── */
@@ -34,18 +44,18 @@
       border: none;
       font-family: inherit;
       font-size: 0.9rem;
-      color: #a8aeb8;
+      color: var(--muted);
       cursor: pointer;
       padding: 6px 0;
       letter-spacing: 0.05em;
-      transition: all 0.2s;
+      transition: color 0.2s;
       border-bottom: 2px solid transparent;
       font-weight: 500;
     }
-    .tab:hover { color: #e8eaed; }
+    .tab:hover { color: var(--fg); }
     .tab.active {
-      color: #6366f1;
-      border-bottom-color: #6366f1;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
 
     /* ── Center layout ── */
@@ -56,8 +66,9 @@
       gap: 0;
     }
 
-    /* ── Breathing circle ── */
+    /* ── Circle wrap ── */
     #circle-wrap {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -65,58 +76,134 @@
       height: 280px;
     }
 
+    /* ── Background glow ── */
+    #bg-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.13) 0%, transparent 70%);
+      transform: scale(0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 4s cubic-bezier(0.4, 0, 0.6, 1), opacity 0.6s ease;
+    }
+
+    /* ── Arc progress SVG ── */
+    #arc-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 280px; height: 280px;
+      pointer-events: none;
+    }
+
+    #arc-circle {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      opacity: 0.15;
+      transition: stroke-dashoffset 0.95s linear, opacity 0.5s ease;
+    }
+
+    /* ── Breathing circle ── */
     #breath-circle {
+      position: relative;
+      z-index: 1;
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      border: 2px solid #6366f1;
-      opacity: 0.85;
-      transition: transform 4s cubic-bezier(0.4, 0, 0.6, 1);
+      border: 4px solid var(--accent);
+      opacity: 0.35;
+      transition: transform 4s cubic-bezier(0.4, 0, 0.6, 1),
+                  border-width 4s cubic-bezier(0.4, 0, 0.6, 1),
+                  opacity 0.5s ease;
     }
 
     @keyframes tickPulse {
-      0%   { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0.15); }
-      100% { box-shadow: 0 0 0 14px rgba(99, 102, 241, 0); }
+      0%   { box-shadow: 0 0 0 0    rgba(var(--accent-rgb), 0.3); }
+      100% { box-shadow: 0 0 0 18px rgba(var(--accent-rgb), 0);   }
     }
-    #breath-circle.tick { animation: tickPulse 0.7s ease-out forwards; }
+    #breath-circle.tick { animation: tickPulse 0.75s ease-out forwards; }
 
     /* ── Countdown ── */
     #breath-count {
       font-size: 4.5rem;
       font-weight: 300;
-      color: #6366f1;
+      color: var(--dim);
       line-height: 1;
       margin-top: 8px;
       min-height: 5rem;
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
+      transition: color 0.3s ease;
     }
+
+    @keyframes countPop {
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    #breath-count.count-pop { animation: countPop 0.5s ease; }
 
     /* ── Phase label ── */
     #breath-phase {
       font-size: 1rem;
-      color: #e8eaed;
+      color: var(--dim);
       font-weight: 400;
       letter-spacing: 0.05em;
       margin-top: 14px;
       min-height: 1.4rem;
+      transition: color 0.3s ease;
     }
+
+    @keyframes phaseIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #breath-phase.phase-in { animation: phaseIn 0.4s ease forwards; }
 
     /* ── Pattern description ── */
     #pattern-desc {
       font-size: 0.75rem;
-      color: #a8aeb8;
+      color: var(--dim);
       letter-spacing: 0.06em;
       margin-top: 32px;
+      transition: color 0.3s ease;
+    }
+
+    /* ── Theme picker ── */
+    #theme-picker {
+      position: fixed;
+      bottom: 62px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .swatch {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      flex-shrink: 0;
+    }
+    .swatch:hover { transform: scale(1.4); }
+    .swatch.active {
+      border-color: var(--muted);
+      transform: scale(1.25);
     }
 
     /* ── Footer hint ── */
     #footer {
       position: fixed;
       bottom: 36px;
-      font-size: 0.75rem;
-      color: #a8aeb8;
+      font-size: 0.72rem;
+      color: var(--dim);
       letter-spacing: 0.04em;
+      transition: color 0.3s ease;
     }
   </style>
 </head>
@@ -130,6 +217,14 @@
 
   <div id="center">
     <div id="circle-wrap">
+      <div id="bg-glow"></div>
+      <svg id="arc-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+        <circle id="arc-circle" cx="140" cy="140" r="120"
+          stroke-dasharray="753.98"
+          stroke-dashoffset="753.98"
+          transform="rotate(-90 140 140)"
+        />
+      </svg>
       <div id="breath-circle"></div>
     </div>
     <div id="breath-count">–</div>
@@ -137,6 +232,7 @@
     <div id="pattern-desc"></div>
   </div>
 
+  <div id="theme-picker"></div>
   <div id="footer">space to pause · tab to change pattern</div>
 
   <script src="code/meditation.js"></script>
