@@ -214,19 +214,28 @@ function zipDistraction(onComplete) {
       const visited = path.includes(key);
       const isFinal = num === maxWaypoint;
 
-      // Circle fill
-      ctx.fillStyle = COLORS.accent;
+      // Circle fill - high contrast so waypoint numbers stay readable.
+      ctx.fillStyle = "#facc15";
+      if (visited) ctx.fillStyle = "#22d3ee";
       if (isFinal) ctx.fillStyle = "#ef4444";
-      if (!visited) ctx.fillStyle = COLORS.bgSecondary;
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = Math.max(2, CELL * 0.055);
+      ctx.shadowColor = isFinal ? "rgba(239, 68, 68, 0.75)" : "rgba(250, 204, 21, 0.65)";
+      ctx.shadowBlur = Math.max(8, CELL * 0.16);
       ctx.beginPath();
       ctx.arc(c * CELL + CELL / 2, r * CELL + CELL / 2, CELL / 2.8, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0;
 
       // Number label
-      ctx.fillStyle = "#000";
+      ctx.fillStyle = "#f8fafc";
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = Math.max(1.5, CELL * 0.05);
       ctx.font = `bold ${CELL * 0.4}px 'Inter', sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+      ctx.strokeText(num, c * CELL + CELL / 2, r * CELL + CELL / 2);
       ctx.fillText(num, c * CELL + CELL / 2, r * CELL + CELL / 2);
     }
   }

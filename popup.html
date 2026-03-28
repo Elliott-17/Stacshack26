@@ -90,6 +90,20 @@
     font-weight: bold;
   }
 
+  button.active-nudges-on {
+    background: #10b981;
+    border-color: #10b981;
+    color: #0f1419;
+    font-weight: bold;
+  }
+
+  button.active-nudges-off {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #fff;
+    font-weight: bold;
+  }
+
   #btn-meditate {
     margin-top: 0;
     background: #5b6eee;
@@ -99,6 +113,20 @@
   #btn-meditate:hover { background: #4a5cdb; }
 
   #status {
+    font-size: 9px;
+    color: #6b7280;
+    min-height: 14px;
+    margin-top: 6px;
+  }
+
+  #nudgesStatus {
+    font-size: 9px;
+    color: #6b7280;
+    min-height: 14px;
+    margin-top: 6px;
+  }
+
+  #presenceStatus {
     font-size: 9px;
     color: #6b7280;
     min-height: 14px;
@@ -127,6 +155,20 @@
   <button id="unproductiveBtn">Unproductive</button>
 </div>
 <div id="status"></div>
+
+<hr class="divider">
+
+<div class="section-label">Smart Nudges</div>
+<div class="mode-buttons">
+  <button id="nudgesToggle">Nudges: Off</button>
+</div>
+<div id="nudgesStatus"></div>
+
+<div class="section-label">Presence Check-ins</div>
+<div class="mode-buttons">
+  <button id="presenceToggle">Check-ins: Off</button>
+</div>
+<div id="presenceStatus"></div>
 
 <hr class="divider">
 
