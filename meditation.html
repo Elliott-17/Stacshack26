@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>breathe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #323437;
+      color: #646669;
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Pattern tabs ── */
+    #pattern-tabs {
+      position: fixed;
+      top: 40px;
+      display: flex;
+      gap: 28px;
+    }
+
+    .tab {
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      color: #646669;
+      cursor: pointer;
+      padding: 4px 0;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: #d1d0c5; }
+    .tab.active {
+      color: #e2b714;
+      border-bottom-color: #e2b714;
+    }
+
+    /* ── Center layout ── */
+    #center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Breathing circle ── */
+    #circle-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 280px;
+      height: 280px;
+    }
+
+    #breath-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid #e2b714;
+      opacity: 0.85;
+      /* transition is set dynamically per phase */
+      transition: transform 4s cubic-bezier(0.4, 0, 0.6, 1);
+    }
+
+    @keyframes tickPulse {
+      0%   { box-shadow: 0 0 0 0   rgba(226, 183, 20, 0.15); }
+      100% { box-shadow: 0 0 0 14px rgba(226, 183, 20, 0); }
+    }
+    #breath-circle.tick { animation: tickPulse 0.7s ease-out forwards; }
+
+    /* ── Countdown ── */
+    #breath-count {
+      font-size: 4.5rem;
+      font-weight: 300;
+      color: #e2b714;
+      line-height: 1;
+      margin-top: 8px;
+      min-height: 5rem;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Phase label ── */
+    #breath-phase {
+      font-size: 1rem;
+      color: #d1d0c5;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      margin-top: 14px;
+      min-height: 1.4rem;
+    }
+
+    /* ── Pattern description ── */
+    #pattern-desc {
+      font-size: 0.7rem;
+      color: #646669;
+      letter-spacing: 0.06em;
+      margin-top: 32px;
+    }
+
+    /* ── Footer hint ── */
+    #footer {
+      position: fixed;
+      bottom: 36px;
+      font-size: 0.7rem;
+      color: #646669;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="pattern-tabs">
+    <button class="tab active" data-pattern="box">box</button>
+    <button class="tab"        data-pattern="478">4-7-8</button>
+    <button class="tab"        data-pattern="calm">calm</button>
+  </div>
+
+  <div id="center">
+    <div id="circle-wrap">
+      <div id="breath-circle"></div>
+    </div>
+    <div id="breath-count">–</div>
+    <div id="breath-phase">press space to start</div>
+    <div id="pattern-desc"></div>
+  </div>
+
+  <div id="footer">space to pause · tab to change pattern</div>
+
+  <script src="code/meditation.js"></script>
+</body>
+</html>
