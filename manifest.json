@@ -1,6 +1,6 @@
 {
   "name": "ChromeRot",
-  "description": "Anti-Productivity Tool - Yes, we will be stealing your data.",
+  "description": "The Chrome Productivity Tool - Yes, we will be stealing your data.",
   "version": "6.7",
   "manifest_version": 3,
   "action": {

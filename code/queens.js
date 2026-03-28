@@ -79,7 +79,7 @@ function queensDistraction(onComplete) {
   `;
 
   const title = document.createElement("div");
-  title.textContent = "👑 Queens";
+  title.textContent = "Queens";
   title.style.cssText = `font-size:1.8rem; font-weight:600; margin-bottom:8px; color: ${COLORS.text};`;
 
   const subtitle = document.createElement("div");
@@ -181,7 +181,7 @@ function queensDistraction(onComplete) {
     }
 
     if (errors.length > 0) {
-      message.textContent = "⚠️ Conflict!";
+      message.textContent = "Conflict!";
       // Flash red on conflicting cells
       for (const [er, ec] of errors) {
         cells[er][ec].style.background = "#e05c5c88";

@@ -43,7 +43,7 @@ function wordleDistraction(onComplete) {
   `;
 
   const title = document.createElement("div");
-  title.textContent = "📖 Wordle";
+  title.textContent = "Wordle";
   title.style.cssText = `font-size: 1.8rem; font-weight: 600; margin-bottom: 8px; color: ${COLORS.text};`;
 
   const subtitle = document.createElement("div");

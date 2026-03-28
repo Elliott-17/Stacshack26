@@ -37,7 +37,7 @@ function mazeDistraction(onComplete) {
   `;
   
   const title = document.createElement("div");
-  title.textContent = "🧭 Maze";
+  title.textContent = "Maze";
   title.style.cssText = `
     font-size: 1.8rem;
     font-weight: 600;

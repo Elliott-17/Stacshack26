@@ -28,15 +28,6 @@ function zipDistraction(onComplete) {
         "3,3": 9
       }
     },
-    // 8x8 - cross pattern forcing long detours
-    {
-      size: 8,
-      waypoints: {
-        "0,0": 1, "0,4": 2, "0,7": 3,
-        "4,7": 4, "4,4": 5, "4,0": 6,
-        "7,0": 7, "7,4": 8, "7,7": 9
-      }
-    },
     // 9x9 - maximum chaos
     {
       size: 9,
@@ -46,16 +37,6 @@ function zipDistraction(onComplete) {
         "8,0": 6,  "8,4": 7,  "8,8": 8,
         "2,2": 9,  "2,6": 10,
         "6,6": 11, "6,2": 12
-      }
-    },
-    // 6x6 - deceptively simple looking
-    {
-      size: 6,
-      waypoints: {
-        "0,0": 1, "0,5": 2,
-        "2,5": 3, "2,3": 4, "2,0": 5,
-        "4,0": 6, "4,3": 7, "4,5": 8,
-        "5,5": 9
       }
     },
     // 7x7 - waypoints near centre force awkward routing
