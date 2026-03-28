@@ -132,6 +132,80 @@
     min-height: 14px;
     margin-top: 6px;
   }
+
+  .timing-grid {
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+    text-align: left;
+  }
+
+  .timing-row {
+    display: grid;
+    grid-template-columns: 1fr 68px;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: #a8aeb8;
+  }
+
+  .timing-row input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 6px;
+    border-radius: 5px;
+    border: 1px solid #334155;
+    background: #111827;
+    color: #e8eaed;
+    font-size: 10px;
+  }
+
+  #saveTimingBtn {
+    margin-top: 8px;
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #0f1419;
+    font-weight: 700;
+  }
+
+  #timingStatus {
+    font-size: 9px;
+    color: #6b7280;
+    min-height: 14px;
+    margin-top: 6px;
+  }
+
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    margin: 8px 0 10px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 6px;
+    font-size: 10px;
+    border-radius: 5px;
+    border: 1px solid #334155;
+    background: #111827;
+    color: #a8aeb8;
+    cursor: pointer;
+  }
+
+  .tab-btn.active {
+    background: #5b6eee;
+    border-color: #5b6eee;
+    color: #0f1419;
+    font-weight: 700;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -146,6 +220,13 @@
 
 <h2>ChromeRot</h2>
 <p class="tagline">Anti-Productivity Tool</p>
+
+<div class="tab-nav">
+  <button id="mainTabBtn" class="tab-btn active">Main</button>
+  <button id="settingsTabBtn" class="tab-btn">Settings</button>
+</div>
+
+<div id="mainTabExtras" class="tab-content active">
 
 <hr class="divider">
 
@@ -170,11 +251,41 @@
 </div>
 <div id="presenceStatus"></div>
 
+</div>
+
+<div id="settingsTab" class="tab-content">
+
+<div class="section-label">Timing (Seconds)</div>
+<div class="timing-grid">
+  <label class="timing-row" for="productiveSeconds">
+    <span>Break after productive</span>
+    <input id="productiveSeconds" type="number" min="1" step="1" value="10">
+  </label>
+  <label class="timing-row" for="unproductiveSeconds">
+    <span>Work nudge after unproductive</span>
+    <input id="unproductiveSeconds" type="number" min="1" step="1" value="10">
+  </label>
+  <label class="timing-row" for="presenceSeconds">
+    <span>Phone check-in after idle</span>
+    <input id="presenceSeconds" type="number" min="1" step="1" value="5">
+  </label>
+</div>
+<div class="mode-buttons">
+  <button id="saveTimingBtn">Save Timings</button>
+</div>
+<div id="timingStatus"></div>
+
+</div>
+
+<div id="mainTab" class="tab-content active">
+
 <hr class="divider">
 
 <div class="section-label">Take a Break</div>
 <div class="mode-buttons">
   <button id="btn-meditate">🧘 Meditation Space</button>
+</div>
+
 </div>
 
 <script src="popup.js"></script>
